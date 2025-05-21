@@ -55,7 +55,7 @@ export class StreamService {
           console.log(`正在从上游relay获取实例信息: ${upstreamUrl}`)
           const response = await axios.get(`${upstreamUrl}/api/connect`, {
             headers: {
-              Ech0_url: this.relayServerUrl // 发送自身URL以便上游relay注册
+              ech0_url: this.relayServerUrl // 发送自身URL以便上游relay注册(使用小写形式标准化)
             }
           })
 

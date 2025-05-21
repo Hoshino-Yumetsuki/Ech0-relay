@@ -271,8 +271,9 @@ async function getAllInstances(): Promise<Ech0Response<ConnectInfo>[]> {
 // Ech0 Connect端点 - 获取所有连接的Ech0实例信息
 app.get('/api/connect', async (req, res) => {
   try {
-    // 从请求头获取Ech0_url
-    const ech0Url = req.header('Ech0_url')
+    // 从请求头获取Ech0_url (使用小写形式标准化)
+    // Express已经将所有的header名称转为小写，我们只需直接使用小写形式
+    const ech0Url = req.header('ech0_url')
 
     // 如果请求头中有Ech0_url，则将该实例信息保存到数据库
     if (ech0Url) {
