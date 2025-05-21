@@ -5,7 +5,7 @@ WORKDIR /app
 # 复制依赖文件
 COPY package.json ./
 
-RUN corepack enable
+RUN corepack enable && corepack use yarn
 
 # 安装依赖
 RUN yarn install
@@ -35,7 +35,9 @@ COPY --from=builder /app/package.json ./
 COPY .env.example ./.env
 
 # 安装生产依赖
-RUN yarn install --production
+RUN corepack enable && corepack use yarn
+
+RUN yarn install
 
 # 切换到非root用户
 USER appuser
