@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { InstanceInfo, Ech0Response, ConnectInfo } from '../types'
+import { InstanceInfo } from '../types'
 
 /**
  * 上下游服务，负责处理relay之间的数据传递
