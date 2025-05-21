@@ -10,6 +10,9 @@
     "dev": "tsx src/index.ts",
     "start": "node dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
