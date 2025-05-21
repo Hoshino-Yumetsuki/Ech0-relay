@@ -5,6 +5,8 @@ import { MongoClient } from 'mongodb'
 import dotenv from 'dotenv'
 import { HealthCheckService } from './services/healthCheckService'
 import { Ech0Service } from './services/ech0Service'
+import { StreamService } from './services/streamService'
+import { mergeInstances } from './services/mergeService'
 
 // 加载环境变量
 dotenv.config()
@@ -38,13 +40,17 @@ const COLLECTION_NAME = 'instances'
 
 // 健康检查配置
 // 单位：秒，转换为毫秒
-const HEALTH_CHECK_INTERVAL = (process.env.HEALTH_CHECK_INTERVAL
-  ? parseInt(process.env.HEALTH_CHECK_INTERVAL, 10)
-  : 5 * 60) * 1000 // 默认5分钟 (300秒)
+const HEALTH_CHECK_INTERVAL =
+  (process.env.HEALTH_CHECK_INTERVAL
+    ? parseInt(process.env.HEALTH_CHECK_INTERVAL, 10)
+    : 5 * 60) * 1000 // 默认5分钟 (300秒)
 
 const MAX_FAILURES = process.env.MAX_FAILURES
   ? parseInt(process.env.MAX_FAILURES, 10)
   : 2 // 默认允许2次失败
+
+// 上游relay配置
+const UP_STREAM = process.env.UP_STREAM || ''
 
 // Relay自身实例配置
 const RELAY_SERVER_NAME = process.env.RELAY_SERVER_NAME || 'Ech0中继服务'
@@ -82,6 +88,7 @@ let instancesCollection: any
 // 服务实例
 let ech0Service: Ech0Service
 let healthCheckService: HealthCheckService
+let streamService: StreamService
 
 // 连接MongoDB并启动服务器
 async function startServer() {
@@ -123,6 +130,9 @@ async function startServer() {
 
     // 创建Ech0服务实例
     ech0Service = new Ech0Service(mongodbWrapper as any)
+
+    // 创建上下游服务实例
+    streamService = new StreamService(RELAY_SERVER_URL, UP_STREAM)
 
     // 将relay自身信息保存到数据库
     try {
@@ -280,9 +290,49 @@ app.get('/api/connect', async (req, res) => {
       }
     }
 
-    // 获取所有实例信息并返回
-    const allInstances = await getAllInstances()
-    res.json(allInstances)
+    // 获取所有本地实例信息
+    const localInstances = await getAllInstances()
+
+    // 如果配置了上游relay，则获取上游relay的实例信息
+    let upstreamInstances: InstanceInfo[] = []
+    if (UP_STREAM) {
+      try {
+        // 从上游relay获取实例信息
+        upstreamInstances = await streamService.getUpstreamInstances()
+        console.log(`从上游relay获取了 ${upstreamInstances.length} 个实例信息`)
+
+        // 将上游获取到的实例保存到MongoDB
+        if (upstreamInstances.length > 0) {
+          console.log('开始将上游实例保存到数据库...')
+          let savedCount = 0
+
+          for (const instance of upstreamInstances) {
+            // 跳过自身实例
+            if (instance.server_url !== RELAY_SERVER_URL) {
+              try {
+                await saveInstance(instance.server_url, instance.connect_info)
+                savedCount++
+              } catch (saveError) {
+                console.error(
+                  `保存上游实例错误 ${instance.server_url}:`,
+                  saveError
+                )
+              }
+            }
+          }
+
+          console.log(`成功将 ${savedCount} 个上游实例保存到数据库`)
+        }
+      } catch (error) {
+        console.error('从上游relay获取实例信息失败:', error)
+        // 即使上游获取失败，也会继续返回本地实例
+      }
+    }
+
+    // 合并本地实例和上游实例，确保不重复
+    const mergedInstances = mergeInstances(localInstances, upstreamInstances)
+
+    res.json(mergedInstances)
   } catch (error) {
     console.error('处理 /api/connect 请求时出错:', error)
     res.status(500).json({
