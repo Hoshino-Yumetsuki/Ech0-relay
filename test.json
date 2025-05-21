@@ -1,0 +1,36 @@
+[
+  {
+    "code": 1,
+    "msg": "连接成功",
+    "data": {
+      "server_name": "葱苓のech0s~",
+      "server_url": "https://ech0.ciraos.top",
+      "logo": "https://ech0.ciraos.top/api/images/1000008298_34c6aa66-4563-4559-a58a-f2573ea15afb.jpg",
+      "ech0s": 5,
+      "sys_username": "ciraos"
+    }
+  },
+  {
+    "code": 1,
+    "msg": "连接成功",
+    "data": {
+      "server_name": "L1nSn0w",
+      "server_url": "https://soopy.cn",
+      "logo": "https://soopy.cn/api/images/avatar_2a1fd983-78c4-48db-815f-e8580c49a01a.png",
+      "ech0s": 73,
+      "sys_username": "L1nSn0w"
+    }
+  },
+  {
+    "code": 1,
+    "msg": "连接成功",
+    "data": {
+      "server_name": "Q78KG",
+      "server_url": "https://relay.example.com",
+      "logo": "xxx",
+      "ech0s": 73,
+      "sys_username": "L1nSn0w",
+      "relay": "true"
+    }
+  }
+]
