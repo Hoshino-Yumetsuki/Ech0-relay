@@ -1,0 +1,28 @@
+{
+  "name": "ech0-relay",
+  "type": "module",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint packages",
+    "lint-fix": "eslint packages --fix",
+    "build": "rolldown -c rolldown.config.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^17.17.0",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-promise": "^7.2.1",
+    "prettier": "^3.5.3",
+    "rolldown": "1.0.0-beta.9",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "packageManager": "yarn@4.9.1+sha512.4d6ab01b3f899acf40a54647f7fbabd7bb6ab70b8b2196e8a0cba3fb5e2fef2c9f659445c8959cc677353eeb643b9e4cca3b9e7448ad960dd84d5e111e07ce8c"
+}
