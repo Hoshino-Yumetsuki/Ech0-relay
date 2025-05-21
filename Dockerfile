@@ -32,7 +32,6 @@ RUN apk add --no-cache tzdata && \
 # 复制构建产物
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
-COPY .env.example ./.env
 
 # 安装生产依赖
 RUN corepack enable && corepack use yarn
@@ -52,4 +51,4 @@ HEALTHCHECK --interval=60s --timeout=5s --start-period=5s --retries=3 CMD wget -
 ENV NODE_ENV=production
 
 # 启动应用
-CMD ["node", "dist/index.js"]
+CMD ["yarn", "node", "dist/index.js"]
