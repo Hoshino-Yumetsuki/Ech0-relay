@@ -17,20 +17,20 @@ export class HealthCheckService {
    * 创建健康检查服务
    * @param db MongoDB实例
    * @param ech0Service Ech0服务实例
-   * @param checkIntervalMs 检查间隔（毫秒），默认5分钟
+   * @param checkIntervalSeconds 检查间隔（秒），默认5分钟（300秒）
    * @param maxFailures 最大允许失败次数，默认2次
    * @param relayServerUrl Relay服务器URL，排除自身检查
    */
   constructor(
     db: MongoDB,
     ech0Service: Ech0Service,
-    checkIntervalMs: number = 5 * 60 * 1000,
+    checkIntervalSeconds: number = 5 * 60,
     maxFailures: number = 2,
     relayServerUrl: string
   ) {
     this.db = db
     this.ech0Service = ech0Service
-    this.checkIntervalMs = checkIntervalMs
+    this.checkIntervalMs = checkIntervalSeconds * 1000 // 将秒转换为毫秒
     this.maxFailures = maxFailures
     this.relayServerUrl = relayServerUrl
   }

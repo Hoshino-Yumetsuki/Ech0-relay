@@ -20,17 +20,5 @@
       "ech0s": 73,
       "sys_username": "L1nSn0w"
     }
-  },
-  {
-    "code": 1,
-    "msg": "连接成功",
-    "data": {
-      "server_name": "Q78KG",
-      "server_url": "https://relay.example.com",
-      "logo": "xxx",
-      "ech0s": 73,
-      "sys_username": "L1nSn0w",
-      "relay": "true"
-    }
   }
 ]

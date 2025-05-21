@@ -37,9 +37,10 @@ const DB_NAME = 'ech0_relay'
 const COLLECTION_NAME = 'instances'
 
 // 健康检查配置
-const HEALTH_CHECK_INTERVAL = process.env.HEALTH_CHECK_INTERVAL
+// 单位：秒，转换为毫秒
+const HEALTH_CHECK_INTERVAL = (process.env.HEALTH_CHECK_INTERVAL
   ? parseInt(process.env.HEALTH_CHECK_INTERVAL, 10)
-  : 5 * 60 * 1000 // 默认5分钟
+  : 5 * 60) * 1000 // 默认5分钟 (300秒)
 
 const MAX_FAILURES = process.env.MAX_FAILURES
   ? parseInt(process.env.MAX_FAILURES, 10)
