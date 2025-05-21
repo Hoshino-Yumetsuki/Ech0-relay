@@ -25,4 +25,9 @@ export interface InstanceInfo {
   server_url: string
   last_updated: Date
   connect_info: Ech0Response<ConnectInfo>
+  /**
+   * 检测失败次数，用于查活功能
+   * 连续两次检测失败则从数据库中删除
+   */
+  failure_count?: number
 }

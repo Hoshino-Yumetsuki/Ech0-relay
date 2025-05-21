@@ -24,6 +24,8 @@ export default [
                 document: "readonly",
                 console: "readonly",
                 MouseEvent: "readonly",
+                setInterval: "readonly",
+                clearInterval: "readonly",
             },
         },
         plugins: {

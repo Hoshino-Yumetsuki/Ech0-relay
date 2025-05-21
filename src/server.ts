@@ -3,6 +3,8 @@ import cors from 'cors'
 import axios from 'axios'
 import { MongoClient } from 'mongodb'
 import dotenv from 'dotenv'
+import { HealthCheckService } from './services/healthCheckService'
+import { Ech0Service } from './services/ech0Service'
 
 // 加载环境变量
 dotenv.config()
@@ -33,6 +35,15 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017'
 const DB_NAME = 'ech0_relay'
 const COLLECTION_NAME = 'instances'
+
+// 健康检查配置
+const HEALTH_CHECK_INTERVAL = process.env.HEALTH_CHECK_INTERVAL
+  ? parseInt(process.env.HEALTH_CHECK_INTERVAL, 10)
+  : 5 * 60 * 1000 // 默认5分钟
+
+const MAX_FAILURES = process.env.MAX_FAILURES
+  ? parseInt(process.env.MAX_FAILURES, 10)
+  : 2 // 默认允许2次失败
 
 // Relay自身实例配置
 const RELAY_SERVER_NAME = process.env.RELAY_SERVER_NAME || 'Ech0中继服务'
@@ -67,6 +78,10 @@ let client: MongoClient
 let db: any
 let instancesCollection: any
 
+// 服务实例
+let ech0Service: Ech0Service
+let healthCheckService: HealthCheckService
+
 // 连接MongoDB并启动服务器
 async function startServer() {
   try {
@@ -81,6 +96,32 @@ async function startServer() {
 
     // 创建索引确保server_url的唯一性
     await instancesCollection.createIndex({ server_url: 1 }, { unique: true })
+
+    // 初始化Ech0服务
+    const mongodbWrapper = {
+      saveInstance: async (instanceInfo: any) => {
+        await instancesCollection.updateOne(
+          { server_url: instanceInfo.server_url },
+          { $set: instanceInfo },
+          { upsert: true }
+        )
+      },
+      getAllInstances: async () => {
+        return await instancesCollection.find().toArray()
+      },
+      getInstance: async (serverUrl: string) => {
+        return await instancesCollection.findOne({ server_url: serverUrl })
+      },
+      removeInstance: async (serverUrl: string) => {
+        const result = await instancesCollection.deleteOne({
+          server_url: serverUrl
+        })
+        return result.deletedCount > 0
+      }
+    }
+
+    // 创建Ech0服务实例
+    ech0Service = new Ech0Service(mongodbWrapper as any)
 
     // 将relay自身信息保存到数据库
     try {
@@ -104,6 +145,15 @@ async function startServer() {
       // 继续启动服务，不因此失败
     }
 
+    // 初始化健康检查服务
+    healthCheckService = new HealthCheckService(
+      mongodbWrapper as any,
+      ech0Service,
+      HEALTH_CHECK_INTERVAL,
+      MAX_FAILURES,
+      RELAY_SERVER_URL
+    )
+
     // 启动Express服务器
     app.listen(PORT, () => {
       console.log(`Ech0中继服务器已启动，监听端口 ${PORT}`)
@@ -116,6 +166,12 @@ async function startServer() {
 可用接口:
 - /api/connect - 获取所有Ech0实例信息（自动注册实例）
       `)
+
+      // 启动健康检查服务
+      healthCheckService.start()
+      console.log(
+        `健康检查服务已启动，检查间隔: ${HEALTH_CHECK_INTERVAL / 1000} 秒，最大失败次数: ${MAX_FAILURES}`
+      )
     })
   } catch (error) {
     console.error('服务器启动失败:', error)
@@ -200,11 +256,6 @@ async function getAllInstances(): Promise<Ech0Response<ConnectInfo>[]> {
 }
 
 // 路由定义
-
-// 健康检查端点
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' })
-})
 
 // Ech0 Connect端点 - 获取所有连接的Ech0实例信息
 app.get('/api/connect', async (req, res) => {

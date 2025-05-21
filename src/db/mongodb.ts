@@ -92,27 +92,9 @@ export class MongoDB {
   }
 
   /**
-   * 获取指定实例
+   * 删除指定实例
    * @param serverUrl 服务器URL
-   * @returns 实例信息
-   */
-  async getInstance(serverUrl: string): Promise<InstanceInfo | null> {
-    if (!this.instancesCollection) {
-      throw new Error('MongoDB 尚未连接')
-    }
-
-    try {
-      return await this.instancesCollection.findOne({ server_url: serverUrl })
-    } catch (error) {
-      console.error('获取实例失败:', error)
-      throw error
-    }
-  }
-
-  /**
-   * 删除实例
-   * @param serverUrl 服务器URL
-   * @returns 是否成功删除
+   * @returns 是否删除成功
    */
   async removeInstance(serverUrl: string): Promise<boolean> {
     if (!this.instancesCollection) {
@@ -126,6 +108,24 @@ export class MongoDB {
       return result.deletedCount > 0
     } catch (error) {
       console.error('删除实例失败:', error)
+      throw error
+    }
+  }
+
+  /**
+   * 获取指定实例
+   * @param serverUrl 服务器URL
+   * @returns 实例信息
+   */
+  async getInstance(serverUrl: string): Promise<InstanceInfo | null> {
+    if (!this.instancesCollection) {
+      throw new Error('MongoDB 尚未连接')
+    }
+
+    try {
+      return await this.instancesCollection.findOne({ server_url: serverUrl })
+    } catch (error) {
+      console.error('获取实例失败:', error)
       throw error
     }
   }
