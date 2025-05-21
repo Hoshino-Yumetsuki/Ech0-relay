@@ -3,10 +3,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # 复制依赖文件
-COPY package.json yarn.lock ./
+COPY package.json ./
 
 # 安装依赖
-RUN yarn install --frozen-lockfile
+RUN yarn install
 
 # 复制源代码
 COPY . .
@@ -15,7 +15,7 @@ COPY . .
 RUN yarn build
 
 # 第二阶段：运行环境
-FROM node:20-alpine
+FROM node:lts-alpine
 
 WORKDIR /app
 
@@ -30,11 +30,10 @@ RUN apk add --no-cache tzdata && \
 # 复制构建产物
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/yarn.lock ./
 COPY .env.example ./.env
 
 # 安装生产依赖
-RUN yarn install --production --frozen-lockfile
+RUN yarn install --production
 
 # 切换到非root用户
 USER appuser
