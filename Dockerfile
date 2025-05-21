@@ -5,6 +5,8 @@ WORKDIR /app
 # 复制依赖文件
 COPY package.json ./
 
+RUN corepack enable
+
 # 安装依赖
 RUN yarn install
 
